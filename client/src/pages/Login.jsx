@@ -138,16 +138,18 @@ export default function Login() {
 			);
 
 			setUser(result.user);
-			console.log("User logged in:", user);
+			console.log("User logged in:", result.user);
 			showToast("Logged in successfully!", "success");
 			setTimeout(() => {
 				navigate("/");
 			}, 2000);
 		} catch (err) {
-			showToast(
-				err.message || "An error occurred during Google login",
-				"error"
-			);
+            console.error("Google Login Error:", err);
+            let msg = err.message || "An error occurred during Google login";
+            if (err.code === 'auth/popup-closed-by-user') msg = "Login cancelled by user";
+            if (err.code === 'auth/popup-blocked') msg = "Login popup blocked. Please allow popups for this site.";
+            if (err.code === 'auth/cancelled-popup-request') msg = "Only one login request can be active at a time.";
+			showToast(msg, "error");
 		}
 	};
 
@@ -156,7 +158,7 @@ export default function Login() {
 		try {
 			const result = await signInWithPopup(auth, githubProvider);
 			const credential = GithubAuthProvider.credentialFromResult(result);
-			const token = credential.accessToken;
+			const token = credential?.accessToken;
 
 			const idToken = await result.user.getIdToken();
 			await axios.post(
@@ -176,6 +178,7 @@ export default function Login() {
 				navigate("/");
 			}, 2000);
 		} catch (err) {
+            console.error("Github Login Error:", err);
 			const msg =
 			err?.code === "auth/account-exists-with-different-credential" 
 				? "An account already exists with the same email using a different sign-in method. Please log in with that provider." 

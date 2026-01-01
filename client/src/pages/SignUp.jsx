@@ -181,17 +181,18 @@ export default function SignUp() {
 			);
 
 			setUser(result.user);
-			console.log("User signed in:", user);
+			console.log("User signed in:", result.user);
 
 			showToast("Successfully signed in with Google!", "success");
 			setTimeout(() => {
 				navigate("/");
 			}, 2000);
 		} catch (err) {
-			showToast(
-				err.message || "An error occurred during Google sign in",
-				"error"
-			);
+            console.error("Google Signup Error:", err);
+            let msg = err.message || "An error occurred during Google sign in";
+            if (err.code === 'auth/popup-closed-by-user') msg = "Sign in cancelled by user";
+            if (err.code === 'auth/popup-blocked') msg = "Sign in popup blocked. Please allow popups for this site.";
+			showToast(msg, "error");
 		}
 	};
 
@@ -200,7 +201,7 @@ export default function SignUp() {
 		try {
 			const result = await signInWithPopup(auth, githubProvider);
 			const credential = GithubAuthProvider.credentialFromResult(result);
-			const token = credential.accessToken;
+			const token = credential?.accessToken;
 
 			const idToken = await result.user.getIdToken();
 			await axios.post(
@@ -221,10 +222,12 @@ export default function SignUp() {
 			}, 2000);
 		} catch (error) {
 			console.error("GitHub login failed:", error);
-			// showToast(error.message || "GitHub login failed", "error");
-			setTimeout(() => {
-				navigate("/");
-			}, 2000);
+            let msg = error.message || "GitHub login failed";
+             if (error.code === 'auth/account-exists-with-different-credential') msg = "An account already exists with the same email using a different sign-in method. Please log in with that provider.";
+			showToast(msg, "error");
+			// setTimeout(() => {
+			// 	navigate("/");
+			// }, 2000);
 		}
 	};
 

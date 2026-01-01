@@ -33,7 +33,7 @@ export default function ContactForm() {
 		try {
 				const base = (import.meta.env.VITE_API_URL && import.meta.env.VITE_API_URL.replace(/\/$/, "")) || "http://localhost:5000";
 				const url = `${base}/api/contact`;
-				const response = await axios.post(
+			const response = await axios.post(
 					url,
 					formData,
 					{
@@ -41,7 +41,7 @@ export default function ContactForm() {
 							"Content-Type": "application/json",
 						},
 						withCredentials: false,
-						timeout: 15000,
+						timeout: 60000,
 					}
 				);
 
@@ -58,7 +58,10 @@ export default function ContactForm() {
 			}, 5000);
 		} catch (error) {
 			console.error("Error submitting contact form:", error);
-			const msg = error?.response?.data?.error || error?.message || "Request failed";
+			let msg = error?.response?.data?.error || error?.message || "Request failed";
+			if (error.code === 'ECONNABORTED') {
+				msg = "Request timed out. The server took too long to respond. Please try again later.";
+			}
 			alert(`There was an error submitting your message: ${msg}`);
 		} finally {
 			setIsSubmitting(false);

@@ -56,17 +56,17 @@ export default function Header() {
       .slice(0, 2)
   }
 
-  const NavLinks = () => (
+  const NavLinks = ({ onClick }) => (
     <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4">
-      <Link to="/" className="px-4 py-2 rounded-xl font-medium text-slate-600 hover:text-primary hover:bg-primary/5 transition-all duration-200">Home</Link>
-      <Link to="/about" className="px-4 py-2 rounded-xl font-medium text-slate-600 hover:text-primary hover:bg-primary/5 transition-all duration-200">About</Link>
+      <Link to="/" onClick={onClick} className="px-4 py-2 rounded-xl font-medium text-slate-600 hover:text-primary hover:bg-primary/5 transition-all duration-200">Home</Link>
+      <Link to="/about" onClick={onClick} className="px-4 py-2 rounded-xl font-medium text-slate-600 hover:text-primary hover:bg-primary/5 transition-all duration-200">About</Link>
       {isLoggedIn && (
-        <Link to="/interview/setup" className="px-4 py-2 rounded-xl font-medium text-slate-600 hover:text-primary hover:bg-primary/5 transition-all duration-200">Practice</Link>
+        <Link to="/interview/setup" onClick={onClick} className="px-4 py-2 rounded-xl font-medium text-slate-600 hover:text-primary hover:bg-primary/5 transition-all duration-200">Practice</Link>
       )}
       {isLoggedIn && (
-        <Link to="/dashboard" className="px-4 py-2 rounded-xl font-medium text-slate-600 hover:text-primary hover:bg-primary/5 transition-all duration-200">Dashboard</Link>
+        <Link to="/dashboard" onClick={onClick} className="px-4 py-2 rounded-xl font-medium text-slate-600 hover:text-primary hover:bg-primary/5 transition-all duration-200">Dashboard</Link>
       )}
-      <Link to="/resources" className="px-4 py-2 rounded-xl font-medium text-slate-600 hover:text-primary hover:bg-primary/5 transition-all duration-200">Resources</Link>
+      <Link to="/resources" onClick={onClick} className="px-4 py-2 rounded-xl font-medium text-slate-600 hover:text-primary hover:bg-primary/5 transition-all duration-200">Resources</Link>
     </div>
   )
 
@@ -145,16 +145,16 @@ export default function Header() {
 
           {isMobileMenuOpen && (
             <div className="md:hidden mt-2 space-y-2 pb-4 bg-white/95 backdrop-blur-xl rounded-2xl p-4 border border-gray-100 shadow-xl">
-              <NavLinks />
+              <NavLinks onClick={() => setIsMobileMenuOpen(false)} />
               {!isLoggedIn ? (
                 <div className="space-y-2 pt-2 border-t border-gray-100 mt-2">
-                  <Link to="/login" className="block px-4 py-2 rounded-xl text-center text-gray-700 hover:bg-gray-50 font-medium">Log in</Link>
-                  <Link to="/signup" className="block px-4 py-2 bg-primary text-white rounded-xl text-center font-medium shadow-lg shadow-primary/20">Sign up</Link>
+                  <Link to="/login" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-2 rounded-xl text-center text-gray-700 hover:bg-gray-50 font-medium">Log in</Link>
+                  <Link to="/signup" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-2 bg-primary text-white rounded-xl text-center font-medium shadow-lg shadow-primary/20">Sign up</Link>
                 </div>
               ) : (
                 <div className="space-y-2 pt-2 border-t border-gray-100 mt-2">
-                  <Link to="/profile" className="block px-4 py-2 rounded-xl text-gray-700 hover:bg-primary/5 hover:text-primary font-medium">Profile</Link>
-                  <button onClick={handleLogout} className="w-full text-left px-4 py-2 rounded-xl text-gray-700 hover:bg-red-50 hover:text-red-600 font-medium">Logout</button>
+                  <Link to="/profile" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-2 rounded-xl text-gray-700 hover:bg-primary/5 hover:text-primary font-medium">Profile</Link>
+                  <button onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }} className="w-full text-left px-4 py-2 rounded-xl text-gray-700 hover:bg-red-50 hover:text-red-600 font-medium">Logout</button>
                 </div>
               )}
             </div>
