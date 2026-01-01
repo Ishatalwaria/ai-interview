@@ -12,10 +12,10 @@ const genAI = GEMINI_API_KEY ? new GoogleGenerativeAI(GEMINI_API_KEY) : null;
 
 // Priorities for free tier: Flash is fastest/cheapest. Pro is valid but slower.
 const MODEL_CANDIDATES = [
-  "gemini-2.0-flash",
-  "gemini-2.0-flash-exp",
-  "gemini-1.5-flash",
-  "gemini-1.5-pro",
+
+  "gemini-2.5-flash-lite",
+  "gemini-2.5-flash",
+
 ];
 
 if (!GEMINI_API_KEY) {
@@ -267,16 +267,14 @@ const buildInterviewInsights = (answers = []) => {
     .slice(0, 3);
 
   const toBulletList = (items, fallbackMessage, positive = true) => {
-    if (!items.length) return `- ${fallbackMessage}`;
-    return items
-      .map((item) => {
-        const sentiment = positive ? "Highlight" : "Improve";
-        const guidance = positive
-          ? item.feedback || "Keep replicating this structured explanation."
-          : item.feedback || "Add detail on your decision making and tangible results.";
-        return `- ${sentiment} on “${item.question}” (${item.score}/100): ${limitWords(guidance, 40)}`;
-      })
-      .join("\n");
+    if (!items.length) return [fallbackMessage];
+    return items.map((item) => {
+      const sentiment = positive ? "Highlight" : "Improve";
+      const guidance = positive
+        ? item.feedback || "Keep replicating this structured explanation."
+        : item.feedback || "Add detail on your decision making and tangible results.";
+      return `${sentiment} on “${item.question}” (${item.score}/100): ${limitWords(guidance, 40)}`;
+    });
   };
 
   let summary;
@@ -491,26 +489,43 @@ Preferred Answer: [Answer]
 /* -------------------------------------------------------------------------- */
 
 const analyzeAnswer = async ({ question, userAnswer, preferredAnswer, role, experience_level, interview_type }) => {
-  const prompt = `Evaluate answer. 
-    Q: ${question} 
-    Ans: ${userAnswer} 
-    Ideal: ${preferredAnswer}. 
-    Output:
-    - Score: [0-100]
-    - Feedback: [text]`;
+  const prompt = `
+  You are an expert interviewer. Evaluate the candidate's answer for the following question.
+
+  Question: "${question}"
+  Candidate Answer: "${userAnswer}"
+  Ideal Answer / Key Points: "${preferredAnswer}"
+  Context: Role: ${role}, Level: ${experience_level}, Type: ${interview_type}
+
+  Instructions:
+  1. Score the answer from 0 to 100.
+  2. If the answer is blank, "I don't know", "skip", or completely irrelevant, Score must be 0.
+  3. Provide constructive Feedback (max 2 sentences).
+
+  Output format:
+  Score: <number>
+  Feedback: <text>
+  `;
 
   if (!genAI) return fallbackScore({ userAnswer, preferredAnswer });
 
   try {
     const text = await callGemini(prompt);
-    let score = 70;
-    let feedback = "Good effort.";
 
-    const lines = text.split("\n");
-    lines.forEach(l => {
-      if (l.includes("Score:")) score = parseInt(l.split(":")[1].trim()) || 70;
-      if (l.includes("Feedback:")) feedback = l.split(":")[1].trim();
-    });
+    // Parse using regex for robustness
+    const scoreMatch = text.match(/Score:\s*(\d+)/i);
+    const feedbackMatch = text.match(/Feedback:\s*([\s\S]+)/i);
+
+    let score = scoreMatch ? parseInt(scoreMatch[1], 10) : null;
+    let feedback = feedbackMatch ? feedbackMatch[1].trim() : text;
+
+    if (score === null) {
+      if (!userAnswer || userAnswer.length < 5 || /don'?t know|skip|pass/i.test(userAnswer)) {
+        score = 0;
+      } else {
+        score = fallbackScore({ userAnswer, preferredAnswer }).score;
+      }
+    }
 
     return { score, feedback };
   } catch (err) {
@@ -526,18 +541,32 @@ const analyzeAnswer = async ({ question, userAnswer, preferredAnswer, role, expe
 const interviewSummary = async (allAnswers = []) => {
   if (!genAI) {
     const insights = buildInterviewInsights(allAnswers);
-    return `**Overall Summary:**\n${insights.summary}\n\n**Strengths:**\n${insights.strengths}\n\n**Areas of Improvement:**\n${insights.areas}`;
+    return `**Overall Summary:**\n${insights.summary}\n\n**Strengths:**\n- ${insights.strengths.join("\n- ")}\n\n**Areas of Improvement:**\n- ${insights.areas.join("\n- ")}`;
   }
 
   try {
-    const summaryPrompt = `Generate interview summary for scores: ${allAnswers.map(a => a.score).join(",")}`;
+    const summaryPrompt = `
+    Analyze these interview question scores and logic.
+    Scores: ${allAnswers.map(a => `Q: ${limitWords(a.question, 10)}... | Score: ${a.score} | Feedback: ${limitWords(a.feedback, 15)}...`).join("\n")}
+    
+    Generate a markdown summary with exactly these 3 sections headers:
+    **Overall Summary:** (3 sentences on performance)
+    **Strengths:** (Bullet points of key strong areas)
+    **Areas of Improvement:** (Bullet points of weak areas)
+    `;
+
     const generatedSummary = await callGemini(summaryPrompt);
 
+    if (generatedSummary && generatedSummary.includes("**Strengths:**") && generatedSummary.includes("**Areas of Improvement:**")) {
+      return generatedSummary;
+    }
+
     const insights = buildInterviewInsights(allAnswers);
-    return generatedSummary || `**Overall Summary:**\n${insights.summary}\n\n**Strengths:**\n${insights.strengths}\n\n**Areas of Improvement:**\n${insights.areas}`;
+    return `**Overall Summary:**\n${insights.summary}\n\n**Strengths:**\n- ${insights.strengths.join("\n- ")}\n\n**Areas of Improvement:**\n- ${insights.areas.join("\n- ")}`;
+
   } catch (err) {
     const insights = buildInterviewInsights(allAnswers);
-    return `**Overall Summary:**\n${insights.summary}\n\n**Strengths:**\n${insights.strengths}\n\n**Areas of Improvement:**\n${insights.areas}`;
+    return `**Overall Summary:**\n${insights.summary}\n\n**Strengths:**\n- ${insights.strengths.join("\n- ")}\n\n**Areas of Improvement:**\n- ${insights.areas.join("\n- ")}`;
   }
 };
 

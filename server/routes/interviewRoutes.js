@@ -212,21 +212,29 @@ router.post("/:interviewId/answer", async (req, res) => {
 				return match ? match[1].trim() : "";
 			};
 
+			const parseList = (text) => {
+				if (Array.isArray(text)) return text;
+				return (text || "")
+					.split("\n")
+					.map(line => line.replace(/^[-•*]\s*/, "").trim())
+					.filter(line => line.length > 0);
+			};
+
 			summaryOutput = extractSection("Overall Summary") || `Overall performance: ${averageScore}/100. Review your answers to identify areas for improvement.`;
-			strengthsOutput = extractSection("Strengths") || "- Complete the interview to see your strengths.";
-			areasOutput = extractSection("Areas of Improvement") || "- Complete the interview to see improvement areas.";
+			strengthsOutput = parseList(extractSection("Strengths")) || ["Complete the interview to see your strengths."];
+			areasOutput = parseList(extractSection("Areas of Improvement")) || ["Complete the interview to see improvement areas."];
 		} catch (err) {
 			console.error("Interview summary parsing failed:", err?.message || err);
 			const insights = buildInterviewInsights(report.answers);
 			summaryOutput = insights.summary;
-			strengthsOutput = insights.strengths;
-			areasOutput = insights.areas;
+			strengthsOutput = insights.strengths; // Already array from aiService now
+			areasOutput = insights.areas;         // Already array from aiService now
 		}
 
 		report.finalScore = averageScore;
 		report.summary = summaryOutput;
-		report.strengths = strengthsOutput;
-		report.areaOfImprovement = areasOutput;
+		report.strengths = Array.isArray(strengthsOutput) ? strengthsOutput : [strengthsOutput];
+		report.areaOfImprovement = Array.isArray(areasOutput) ? areasOutput : [areasOutput];
 	}
 
 	await report.save();

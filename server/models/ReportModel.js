@@ -13,8 +13,8 @@ const reportSchema = new mongoose.Schema({
   ],
   finalScore: Number,
   summary: String,
-  areaOfImprovement: String,
-  strengths: String,
+  areaOfImprovement: [String],
+  strengths: [String],
   createdAt: { type: Date, default: Date.now },
 });
 

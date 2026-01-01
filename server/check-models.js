@@ -21,10 +21,9 @@ async function listModels() {
         // However, let's try to hit a model that should exist to see if it works.
 
         const candidates = [
-            "gemini-1.5-flash",
-            "gemini-1.5-pro",
-            "gemini-1.0-pro",
-            "gemini-pro"
+            "gemini-2.5-flash-lite",
+            "gemini-2.5-flash",
+            
         ];
 
         for (const modelName of candidates) {
