@@ -1,0 +1,111 @@
+/*
+ * @license MIT License
+ * Copyright (c) 2025 Abhinav Mishra
+ */
+
+@import "tailwindcss";
+
+@theme {
+  /* 2. Define Custom Theme Variables */
+  --font-sans: 'Outfit', sans-serif;
+
+  --color-primary: #4F46E5;
+  /* Indigo 600 */
+  --color-primary-hover: #4338CA;
+  /* Indigo 700 */
+  --color-secondary: #06B6D4;
+  /* Cyan 500 */
+  --color-accent: #8B5CF6;
+  /* Violet 500 */
+
+  --color-dark: #0f172a;
+  /* Slate 900 */
+  --color-light: #f8fafc;
+  /* Slate 50 */
+
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-fade-in: fadeIn 0.5s ease-out forwards;
+}
+
+/* 3. Global Styles & Animations */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    font-family: 'Outfit', sans-serif;
+  }
+
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased;
+    background-image:
+      radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(6, 182, 212, 0.15) 0px, transparent 50%);
+    background-attachment: fixed;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-white/70 backdrop-blur-lg border border-white/20 shadow-lg;
+  }
+
+  .glass-dark {
+    @apply bg-slate-900/80 backdrop-blur-lg border border-white/10 shadow-xl text-white;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary;
+  }
+
+  .btn-primary {
+    @apply px-6 py-3 rounded-xl bg-gradient-to-r from-primary to-accent text-white font-semibold shadow-lg shadow-primary/30 transition-all duration-300 hover:scale-[1.02] hover:shadow-primary/50 active:scale-95;
+  }
+
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-primary) #f3f4f6;
+  }
+}
+
+/* Keyframes */
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Scrollbar Webkit Overrides */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary-hover);
+}
