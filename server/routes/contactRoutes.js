@@ -41,17 +41,26 @@ router.post('/', async (req, res) => {
     }
 
     try {
-        const transporter = SMTP_HOST
-            ? nodemailer.createTransport({
+        const transportOptions = SMTP_HOST
+            ? {
                 host: SMTP_HOST,
                 port: SMTP_PORT,
                 secure: SMTP_SECURE,
                 auth: { user: SMTP_USER, pass: SMTP_PASS },
-            })
-            : nodemailer.createTransport({
+                // Timeouts to prevent hanging if port is blocked
+                connectionTimeout: 10000, // 10 seconds
+                greetingTimeout: 10000,
+                socketTimeout: 25000,
+            }
+            : {
                 service: EMAIL_SERVICE,
                 auth: { user: SMTP_USER, pass: SMTP_PASS },
-            });
+                // Timeouts
+                connectionTimeout: 10000,
+                greetingTimeout: 10000,
+            };
+
+        const transporter = nodemailer.createTransport(transportOptions);
 
         // Create a timeout promise
         const timeoutPromise = new Promise((_, reject) => {

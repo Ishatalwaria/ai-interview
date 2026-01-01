@@ -59,9 +59,16 @@ export default function ContactForm() {
 		} catch (error) {
 			console.error("Error submitting contact form:", error);
 			let msg = error?.response?.data?.error || error?.message || "Request failed";
+			
+            // If the server returns HTML (e.g. 504 Gateway Timeout from the proxy), data might be a string
+            if (typeof error?.response?.data === 'string' && error?.response?.status === 504) {
+                 msg = "Server Gateway Timeout. The email service is unreachable from the hosting provider.";
+            }
+
 			if (error.code === 'ECONNABORTED') {
 				msg = "Request timed out. The server took too long to respond. Please try again later.";
 			}
+			console.log("Full error object:", error); // Debugging
 			alert(`There was an error submitting your message: ${msg}`);
 		} finally {
 			setIsSubmitting(false);
