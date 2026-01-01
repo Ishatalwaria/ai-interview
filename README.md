@@ -2,7 +2,7 @@
 <p align="center"> An AI enabled smart Interview Preparation Platform </p>
 
 <p align="center">
-  🔗 <a href=""><b>Live Demo → prepbuddyai.vercel.app</b></a>
+  🔗 <a href=""><b>Live Demo → </b></a>
 </p>
 
 
@@ -63,32 +63,4 @@
 </ul>
 
 ---
-
-<h2 id='demo-screenshots'> 4. Screenshots 📷 </h2>
-
-| Homepage | About Page |
-|----------|-------------|
-| ![Homepage](./screenshots/home.png) | ![Report](./screenshots/about.png) |
-
-| Interview Setup | Interview Question |
-|----------|-------------|
-| ![Homepage](./screenshots/setup1.png) | ![Report](./screenshots/question1.png) |
-
-| Interview Report | Report Pdf |
-|----------|-------------|
-| ![Homepage](./screenshots/report.png) | ![Report](./screenshots/reportPdf.png) |
-
-| Dashboard |
-|----------|
-| ![Homepage](./screenshots/dashboard1.png) |
-
-| Resources |
-|-------------|
-| ![Resources](./screenshots/resources1.png) |
-
-
----
-
-
-
 
